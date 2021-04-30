@@ -1,0 +1,2 @@
+# Well404sBot_ConfigTool
+用于一键生成适用于go-cqhttp以及nonebot2的机器人，并进行基本的管理
