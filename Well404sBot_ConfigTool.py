@@ -219,40 +219,55 @@ def check_portnum(portnum = ''):
         if int(portnum) > 5000:
             if not int(portnum) in read_bot(mod = 'port'):
                 return int(portnum)
-        return check_portnum(random.randint(5000, 65535))
+        return check_portnum(random.randint(10000, 65535))
     except:
-        return check_portnum(random.randint(5000, 65535))
+        return check_portnum(random.randint(10000, 65535))
 #安装依赖库
 def pip(libs):
     def action(libs):
         print ("开始线程pip")
-        num = 0
+        trytime = 0
         failed_libs = []    
-        for lib in libs:
-            #先尝试用阿里镜像源安装
-            try:
-                os.system("pip install -i http://mirrors.aliyun.com/pypi/simple/ " + lib)
-                num += 1
-            except:
-                #不行就用清华镜像源安装
+        while len(libs):
+            trytime += 1
+            #读取已安装的库的列表
+            lib_str = os.popen('pip freeze').read()
+            #遍历要安装的库
+            for lib in libs:
+                #查看该库是否已安装，是则移除，不是则安装，每个源尝试两次
                 try:
-                    os.system("pip install https://pypi.tuna.tsinghua.edu.cn/simple/ " + lib)
-                    num += 1
+                    lib_check,_ = lib.split('==')
                 except:
-                    #还不行就用官方镜像源安装
+                    lib_check = lib
+                if lib_check in lib_str:
+                    print(f'{lib}已安装')
+                    libs.remove(lib)
+                else:
+                    print(f'{lib}未安装，正在进行第{trytime}次尝试')
                     try:
-                        os.system("pip install -i https://pypi.org/simple " + lib)
-                        num += 1
-                    #再不行就没招了
+                        #第一轮尝试用清华镜像源
+                        if trytime <= 2:
+                            print('正在尝试从清华大学镜像源安装')
+                            os.system("pip install -i https://pypi.tuna.tsinghua.edu.cn/simple/ --trusted-host pypi.tuna.tsinghua.edu.cn " + lib)
+                        #最后一轮尝试用官方源
+                        elif trytime <= 8:
+                            print('正在尝试从官方源安装')
+                            os.system("pip install -i https://pypi.org/simple --trusted-host pypi.org " + lib)
+                        elif trytime <=10:
+                            print('正在尝试从官方源安装，并忽略版本')
+                            os.system("pip install -i https://pypi.org/simple --trusted-host pypi.org " + lib_check)
+                        #上述方法均尝试过之后，
+                        elif trytime > 10:
+                            failed_libs.append(lib)
+                            libs.remove(lib)
                     except Exception as e:
-                        print('————————————————安装错误提示————————————————')
-                        for i in range(50):
-                            print(e)
-                        print('————————————————错误提示完毕————————————————')
-                        failed_libs.append(lib)
+                        print(e)
+                        if trytime > 10:
+                            failed_libs.append(lib)
+                            libs.remove(lib)
         for i in range(10):
             if len(failed_libs):
-                print(f'已成功安装{num}个库，{failed_libs}未能成功安装，请重新安装')
+                print(f'{failed_libs}未能成功安装，请重新安装')
             else:
                 print('所需的库全部安装成功')
         print ("退出线程pip")
