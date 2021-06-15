@@ -8,3 +8,5 @@ nonebot2 https://github.com/nonebot/nonebot2
 本项目是希望能有更多希望拥有自己的QQ机器人的同学不受技术门槛的限制，能够轻松搭建并启动机器人
 # 如何使用本项目
 https://www.bilibili.com/video/BV1cp4y147Uw
+# 新版插件
+新版插件暂不支持一键导入，请到qq群720053992下载。
